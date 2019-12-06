@@ -1,6 +1,6 @@
 import React,{ useState } from 'react';
 
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import styled from 'styled-components'
 import './index.css';
@@ -19,9 +19,9 @@ const mapStateToProps = state => ({
     ...state
 })
 
-function useQuery() {
-    return new URLSearchParams(useLocation().search);
-  }  
+// function useQuery() {
+//     return new URLSearchParams(useLocation().search);
+//   }  
 
 function Internal(props){
     const [ offsetTime, setOffsetTime ] = useState(5)
@@ -31,7 +31,7 @@ function Internal(props){
     }
 
     // let query = new URLSearchParams(useLocation().search);
-    let query = useQuery();
+    let { time, wordIndex, videoIndex, word, youtubeId, unique } = useParams();
     const { videoIndex, videos, wordIndex, words, questionMode } = props;
 
     return (
