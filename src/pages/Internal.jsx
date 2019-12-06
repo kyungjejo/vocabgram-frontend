@@ -32,6 +32,7 @@ function Internal(props){
 
     // let query = new URLSearchParams(useLocation().search);
     let { time, wordIndex, videoIndex, word, youtubeId, unique } = useParams();
+    console.log(useParams())
     // const { videoIndex, videos, wordIndex, words, questionMode } = props;
 
     return (

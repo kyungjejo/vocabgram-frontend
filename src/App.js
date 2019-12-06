@@ -20,7 +20,7 @@ function App(props) {
           <Route exact path="/watch" component={Watch} />
           <Route exact path="/infer" component={Infer} />
           <Route exact path="/practice" component={Practice} />
-          <Route path="/internal/:time/:wordIndex/:videoIndex/:word/:youtubeId/:unique" component={Internal} />
+          <Route exact path="/internal/:time/:wordIndex/:videoIndex/:word/:youtubeId/:unique" component={Internal} />
           <Route exact path="/" component={Home} />
       </div>
     </Router>
