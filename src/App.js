@@ -1,26 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
-function App() {
+import { connect } from 'react-redux';
+import './App.css';
+import 'semantic-ui-css/semantic.min.css';
+
+import MainHeader from './components/MainHeader';
+import Watch from './pages/Watch';
+import Infer from './pages/Infer';
+import Practice from './pages/Practice';
+import Home from './pages/Home';
+import Internal from './pages/Internal';
+
+function App(props) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <MainHeader/>
+          <Route exact path="/watch" component={Watch} />
+          <Route exact path="/infer" component={Infer} />
+          <Route exact path="/practice" component={Practice} />
+          <Route path="/internal" component={Internal} />
+          <Route exact path="/" component={Home} />
+      </div>
+    </Router>
   );
 }
 
-export default App;
+export default connect()(App);
