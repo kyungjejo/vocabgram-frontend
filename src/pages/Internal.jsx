@@ -38,13 +38,13 @@ function Internal(props){
         <Container className="video-container">
             <Video
                 offsetTime={offsetTime}
-                targetTime={parseInt(query.get("time"))}
-                youtubeId={query.get("youtube_id")}
-                sentNum={parseInt(query.get("unique"))}
-                word={query.get("word")}
+                targetTime={time}
+                youtubeId={youtubeId}
+                sentNum={unique}
+                word={word}
                 type="watch"
             />
-            <ActivityBar mode={query.get("videoIndex")<2} type="watch" word={query.get("word")} incOffset={incOffset}/>
+            <ActivityBar mode={videoIndex<2} type="watch" word={word} incOffset={incOffset}/>
         </Container>
     )
 }
