@@ -32,7 +32,7 @@ function Internal(props){
 
     // let query = new URLSearchParams(useLocation().search);
     let { time, wordIndex, videoIndex, word, youtubeId, unique } = useParams();
-    const { videoIndex, videos, wordIndex, words, questionMode } = props;
+    // const { videoIndex, videos, wordIndex, words, questionMode } = props;
 
     return (
         <Container className="video-container">
