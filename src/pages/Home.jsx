@@ -65,7 +65,7 @@ class Home extends React.Component {
                     <div>
                         <Link to="/watch"><Button primary>Type A</Button></Link>
                         <Link to="/infer"><Button primary>Type B</Button></Link>
-                        <Link to="/internal/:word"><Button primary>Internal</Button></Link>
+                        <Link to="/internal"><Button primary>Internal</Button></Link>
                     </div>
                     :
                     <Dimmer active>
