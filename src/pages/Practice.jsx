@@ -5,6 +5,9 @@ import './index.css';
 import ActivityBar from '../components/ActivityBar';
 import Video from '../components/Video';
 
+import { connect } from 'react-redux';
+import { Dimmer, Loader } from 'semantic-ui-react';
+
 const Container = styled.div`
     min-width: 60%;
     max-width: 80%;
@@ -13,29 +16,116 @@ const Container = styled.div`
 
 const FlexDiv = styled.div`
     display: flex;
+    justify-content: center !important;
 `
 
-export default class Watch extends React.Component{
+const StyledDiv = styled.div`
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+`
+
+const mapStateToProps = state => ({
+    ...state
+})
+
+class Practice extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            offsetTime: 5,
+            vIndex: -1,
+            wIndex: -1,
+            answer: 0,
+            len: false,
+        }
+        this.incOffset = this.incOffset.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.videoIndex.index !== this.props.videoIndex.index) {
+            const { videos, words, wordIndex } = this.props;
+            let wIndex = Math.floor(Math.random() * Object.keys(words).length)
+            if ( wordIndex === wIndex) {
+                if (wIndex > 0) wIndex -= 1
+                else wIndex += 1
+            } 
+            let vIndex = Math.floor(Math.random() * videos[wIndex].length) + 1
+            let answer = Math.round(Math.random());
+            this.setState({
+                wIndex: wIndex,
+                vIndex: vIndex,
+                answer: answer,
+                len: Object.keys(videos).length > 0,
+            })
+        }
+    }
+
+    componentDidMount() {
+        const { videos, words, wordIndex } = this.props;
+        let wIndex = Math.floor(Math.random() * Object.keys(words).length)
+        if ( wordIndex === wIndex) {
+            if (wIndex > 0) wIndex -= 1
+            else wIndex += 1
+        } 
+        let vIndex = Math.floor(Math.random() * videos[wIndex].length) + 1
+        let answer = Math.round(Math.random());
+        this.setState({
+            wIndex: wIndex,
+            vIndex: vIndex,
+            answer: answer,
+            len: Object.keys(videos).length > 0
+        })
+    }
+
+    incOffset() {
+        const { offsetTime } = this.state;
+        this.setState({offsetTime: offsetTime + 5});
+    }
 
     render() {
+        const { offsetTime, answer, wIndex, vIndex, len } = this.state;
+        const { videoIndex, videos, wordIndex, words, questionMode } = this.props;
         return (
             <Container className="video-container">
                 <FlexDiv>
-                <Video
-                    offsetTime={5}
-                    targetTime={100}
-                    youtubeId="9bVozM2YXvI"
-                    type="practice"
-                />
-                <Video
-                    offsetTime={5}
-                    targetTime={100}
-                    youtubeId="9bVozM2YXvI"
-                    type="practice"
-                />
+                    <div>
+                        <StyledDiv>Video A</StyledDiv>
+                        {   wIndex > -1 && vIndex > -1 && len ?
+                            <Video
+                                offsetTime={offsetTime}
+                                targetTime={ wIndex > -1 && vIndex > -1 && len && answer===0 ? videos[wordIndex.index][videoIndex.index][2] : videos[wIndex][vIndex][2] }
+                                youtubeId={ wIndex > -1 && vIndex > -1 && len && answer===0 ? videos[wordIndex.index][videoIndex.index][0] : videos[wIndex][vIndex][0] }
+                                sentNum={ wIndex > -1 && vIndex > -1 && len && answer===0 ? videos[wordIndex.index][videoIndex.index][1] : videos[wIndex][vIndex][1] }
+                                word={ answer===0 ? words[wordIndex.index] : words[wIndex] }
+                                type="practice"
+                            />
+                            :
+                            <Dimmer><Loader active /></Dimmer>
+                        }
+                    </div>
+                    <div>
+                        <StyledDiv>Video B</StyledDiv>
+                        {
+                            wIndex > -1 && vIndex > -1 && len ?
+                                <Video
+                                    offsetTime={offsetTime}
+                                    targetTime={ wIndex > -1 && vIndex > -1 && len && answer===1 ? videos[wordIndex.index][videoIndex.index][2] : videos[wIndex][vIndex][2] }
+                                    youtubeId={ wIndex > -1 && vIndex > -1 && len && answer===1 ? videos[wordIndex.index][videoIndex.index][0] : videos[wIndex][vIndex][0] }
+                                    sentNum={ wIndex > -1 && vIndex > -1 && len && answer===1 ? videos[wordIndex.index][videoIndex.index][1] : videos[wIndex][vIndex][1] }
+                                    word={ answer===1 ? words[wordIndex.index] : words[wIndex] }
+                                    type="practice"
+                                />
+                            :
+                            <Dimmer><Loader active /></Dimmer>
+                        }
+                    </div>
                 </FlexDiv>
-                <ActivityBar mode={0} type="practice" />
+                <ActivityBar answer={answer} questionMode={questionMode} type="practice" word={words[wordIndex.index]} incOffset={this.incOffset}/>
+                {/* <ActivityBar mode={0} type="practice" /> */}
             </Container>
         )
     }
 }
+
+export default connect(mapStateToProps)(Practice);

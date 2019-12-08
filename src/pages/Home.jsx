@@ -4,7 +4,9 @@ import './index.css';
 import { Button, Dimmer, Loader, } from 'semantic-ui-react';
 import { Link } from "react-router-dom";
 import { connect } from 'react-redux';
-import { storeWords, storeVideos, updateVideoIndex, updateWordIndex, storeDefinitions, updateMode, storeDummy } from '../actions';
+import { storeWords, storeVideos, updateVideoIndex, storeDummyVideos, storeDummyWords,
+    storeUserID, storePracticeIndex, updateWordIndex, storeDefinitions, 
+    updateMode, storeDummy, storePseudowords } from '../actions';
 
 const Container = styled.div`
     min-width: 60%;
@@ -25,34 +27,49 @@ const mapDispatchToProps = dispatch => ({
     updateWordIndex: (index) => dispatch(updateWordIndex(index)),
     updateMode: (mode) => dispatch(updateMode(mode)),
     storeDummy: (dummy) => dispatch(storeDummy(dummy)),
+    storeUserID: (id) => dispatch(storeUserID(id)),
+    storePracticeIndex: (arr) => dispatch(storePracticeIndex(arr)),
+    storePseudowords: (pseudo) => dispatch(storePseudowords(pseudo)),
+    storeDummyVideos: (videos) => dispatch(storeDummyVideos(videos)),
+    storeDummyWords: (words) => dispatch(storeDummyWords(words)),
 })
 
 class Home extends React.Component {
     componentDidMount() {
-        const { storeWords, storeVideos, storeDefinitions, storeDummy,
-                updateVideoIndex, updateWordIndex, storeUserId, updateMode } = this.props;
+        const { storeWords, storeVideos, storeDefinitions, storeDummy, userid, storePracticeIndex, storePseudowords,
+                updateVideoIndex, updateWordIndex, storeUserID, updateMode, storeDummyVideos, storeDummyWords } = this.props;
         updateVideoIndex(0);
         updateWordIndex(0);
         updateMode(false);
-        fetch(`${process.env.REACT_APP_URL}/words`)
-            .then(res => res.json())
-            .then(res => {
-                let videos = res['videos'];
-                let words = res['words'];   
-                let definitions = res['definitions'];
-                let ID = res['user'];
-                storeWords(words);
-                storeVideos(videos);
-                storeDefinitions(definitions);
-                storeUserId(ID);
-            })
-            .catch(error => console.log('Error! ' + error.message))
-        fetch(`${process.env.REACT_APP_URL}/dummy`)
-            .then(res => res.json())
-            .then(res => {
-                let dummy = res['dummy']
-                storeDummy(dummy);
-            })
+        if (Object.keys(userid).length === 0 ) {
+            fetch(`${process.env.REACT_APP_URL}/words`)
+                .then(res => res.json())
+                .then(res => {
+                    let videos = res['videos'];
+                    let words = res['words'];   
+                    let definitions = res['definitions'];
+                    let ID = res['user'];
+                    let pseudo = res['pseudowords'];
+                    let dummyWords = res['dummy_words'];
+                    let dummyVideos = res['dummy_videos'];
+                    storeWords(words);
+                    storeVideos(videos);
+                    storeDefinitions(definitions);
+                    storeUserID(ID);
+                    storePseudowords(pseudo);
+                    storePracticeIndex(new Array(words.length).fill(0));
+                    storeDummyVideos(dummyVideos);
+                    storeDummyWords(dummyWords);
+                })
+                .catch(error => console.log('Error! ' + error.message))
+            fetch(`${process.env.REACT_APP_URL}/dummy`)
+                .then(res => res.json())
+                .then(res => {
+                    let dummy = res['dummy']
+                    storeDummy(dummy);
+                })
+        }
+
     }
     render() {
         const { definitions } = this.props;

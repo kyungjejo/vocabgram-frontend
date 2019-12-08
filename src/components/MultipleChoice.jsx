@@ -24,26 +24,32 @@ const mapDispatchToProps = dispatch => ({
 function MultipleChoice(props) {
     const [selectedOptions, setSelectedOptions]= useState({});
     const [result, setResult]= useState();
-    const { questionOptions, wordIndex, words, videoIndex,
-        updateVideoIndex, updateWordIndex, updateMode } = props;
+    const { questionOptions, videos, videoIndex, wordIndex, words, userid, pseudo, incOffset, onNext, answer } = props;
 
-    function onSubmitHandler() {
+    function onSubmitHandler(type) {
         setResult(selectedOptions.selectedOptions[0]);
+        let _userid;
+        if (typeof userid === "object") _userid = Object.values(userid).join('')
+        else _userid = userid
+        if (type==='infer') {
+            let param = `user=${_userid}&word=${words[wordIndex.index]}&result=${selectedOptions.selectedOptions[0]==='correct' ? '1' : '0'}`
+            fetch('/infer?'+param)
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log('Error! ' + error.message))   
+        }
+        else if (type==='practice') {
+            let param = `user=${_userid}&word=${words[wordIndex.index]}&videoId=${videos[wordIndex.index][videoIndex.index][0]}&videoIndex=${videoIndex.index}&result=${selectedOptions.selectedOptions[0]==='correct' ? '1' : '0'}`
+            fetch('/practice?'+param)
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log('Error! ' + error.message))   
+        }
     }
 
-    function onNext() {
-        if (result === 'correct') {
-            const next = wordIndex.index < Object.keys(words).length - 1;
-            if (next) {
-                updateWordIndex(wordIndex.index+1);
-                updateVideoIndex(0);
-                updateMode(false);
-            }
-        }
-        else {
-            updateMode(false);
-            updateVideoIndex(videoIndex.index+1);
-        }
+    const nextPracticeHandler = (result, type) => {
+        onNext(result, type);
+        setResult(false);
     }
 
     return (
@@ -55,7 +61,7 @@ function MultipleChoice(props) {
                             <div style={{padding: '2px', background: result ? result === 'correct' ? 'rgba(20,255,20,0.4)' : 'rgba(255,20,20,0.6)' : ''}}>
                                 <div>{result ? result === 'correct' ? "You are correct!." : "Whoops! Wrong answer. Please watch more videos and try again." : ''}
                                 </div>
-                                <Button primary onClick={onNext}>
+                                <Button primary onClick={() => onNext(result, 'infer')}>
                                     { result === 'correct' ? "Next" : "Watch more video"}
                                 </Button>
                             </div>
@@ -64,7 +70,7 @@ function MultipleChoice(props) {
                                 <Test onOptionSelect={selectedOptions => setSelectedOptions({selectedOptions})}
                                     style={{margin: 'auto', maxWidth: '840px', display: 'block', minWidth: '80%'}}>
                                     <QuestionGroup questionNumber={0}>
-                                    <Question style={{fontSize: '16px', fontWeight: '400', padding: '8px 0'}}>Which of the following definitions best describe the word, <span style={{fontWeight: 800}}>"{words[wordIndex.index]}"</span>?</Question>
+                                    <Question style={{fontSize: '16px', fontWeight: '400', padding: '8px 0'}}>Which of the following definitions best describe the word, <span style={{fontWeight: 800}}>"{pseudo[wordIndex.index]}"</span>?</Question>
                                     {
                                         questionOptions.map((val, idx) => {
                                             return <Option disabled={result} key={idx} style={{fontSize: '14px'}} value={val[0]}>{val[1]}</Option>
@@ -72,24 +78,41 @@ function MultipleChoice(props) {
                                     }
                                     </QuestionGroup>
                                 </Test>   
-                                <Button positive onClick={onSubmitHandler}>Submit</Button>
+                                <Button positive onClick={() => onSubmitHandler('infer')}>Submit</Button>
                             </div>
                         }
                     </div>
                     :
                     ''
                 :
-                <Test onOptionSelect={selectedOptions => setSelectedOptions({selectedOptions})}
-                    style={{margin: 'auto', maxWidth: '640px', display: 'block', minWidth: '60%'}}>
-                    <QuestionGroup questionNumber={0}>
-                    <Question style={{fontSize: '16px', fontWeight: '800', padding: '8px 0'}}>In which video do you think the word, "{words[wordIndex.index]}", is more appropriate to  ?</Question>
+                <div>
                     {
-                        practiceOptions.map((val, idx) => {
-                            return <Option key={idx} style={{fontSize: '14px'}} value={val.value.toString()}>{val.name}</Option>
-                        })
+                        result ?
+                        <div style={{padding: '2px', background: result ? result === 'correct' ? 'rgba(20,255,20,0.4)' : 'rgba(255,20,20,0.6)' : ''}}>
+                            <div>{result ? result === 'correct' ? "You are correct!." : "Whoops! Wrong answer." : ''}
+                            </div>
+                            <Button primary onClick={() => nextPracticeHandler(result,'practice')}>
+                                Next
+                            </Button>
+                        </div>
+                        :
+                        <div>
+                            <Test onOptionSelect={selectedOptions => setSelectedOptions({selectedOptions})}
+                                style={{margin: 'auto', maxWidth: '640px', display: 'block', minWidth: '60%'}}>
+                                <QuestionGroup questionNumber={0}>
+                                <Question style={{fontSize: '16px', fontWeight: '800', padding: '8px 0'}}>In which video do you think the word, "{pseudo[wordIndex.index]}", is more appropriate to  ?</Question>
+                                {
+                                    practiceOptions.map((val, idx) => {
+                                        return <Option key={idx} style={{fontSize: '14px'}} value={answer===idx ? 'correct' : 'incorrect'}>{val.name}</Option>
+                                    })
+                                }
+                                </QuestionGroup>
+                            </Test>
+                            <Button onClick={incOffset} color="yellow">Video is too short.</Button>
+                            <Button positive onClick={() => onSubmitHandler('practice')}>Proceed</Button>
+                        </div>
                     }
-                    </QuestionGroup>
-                </Test>
+                </div>
     );
 }
 

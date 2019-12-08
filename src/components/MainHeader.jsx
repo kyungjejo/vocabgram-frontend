@@ -9,12 +9,20 @@ const StyledHeader = styled(Header)`
     text-align: center;
 `
 
+const StyledDiv = styled.div`
+    font-weight: 400;
+    font-size: 14px;
+`
+
 const mapStateToProps = state => ({
     ...state
 })
 
 function MainHeader(props) {
-    const { userid } = props;
+    let { userid } = props;
+    let _userid;
+    if (typeof userid === "object") _userid = Object.values(userid).join('')
+    else _userid = userid
     return(
         <StyledHeader as='h2' textAlign="center">
             <Header.Content>
@@ -30,7 +38,7 @@ function MainHeader(props) {
                     :
                     "Welcome"
                 }
-                {/* <span>{userid ? userid : ''}</span> */}
+                <StyledDiv>{_userid ? _userid : ''}</StyledDiv>
             </Header.Content>
         </StyledHeader>
     )

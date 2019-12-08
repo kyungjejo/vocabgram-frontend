@@ -12,6 +12,7 @@ const StyledReactPlayer = styled(ReactPlayer)`
 const SmallReactPlayer = styled(ReactPlayer)`
     min-width: 30%;
     max-width: 420px;
+    height: auto !important;
     margin: 8px auto;
     padding: 4px;
 `
@@ -34,10 +35,11 @@ class Video extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        const { offsetTime } = nextProps;
+        const { offsetTime, youtubeId } = nextProps;
         if ( offsetTime)
         this.setState({
-            offsetTime: offsetTime
+            offsetTime: offsetTime,
+            youtubeId: youtubeId,
         })
     }
 
@@ -52,7 +54,7 @@ class Video extends React.Component {
             this.player.pause();
             this.player.seekTo(targetTime - offsetTime,"seconds");
         }
-        if (this.player && type === 'practice') {
+        if (this.player) {
             if (playedSeconds>targetTime - 1 && playedSeconds<targetTime + 1)
                 this.player.mute();
             else
@@ -72,7 +74,7 @@ class Video extends React.Component {
     }
 
     render() {
-        const { youtubeId, type } = this.props;
+        const { youtubeId, type, sentNum, word } = this.props;
         const { divActive } = this.state;
         return (
             type === 'practice' ?
@@ -80,7 +82,7 @@ class Video extends React.Component {
                     url={[`https://s3.ap-northeast-2.amazonaws.com/exprgram.kyungjejo.com/video/${youtubeId}.mp4`]}
                     type='video/mp4'
                     controls
-                    autoplay={false}
+                    autoPlay={false}
                     progressInterval={500}
                     onProgress={this.onProgressHandler}
                     onReady={this.onReadyHandler}
@@ -89,7 +91,7 @@ class Video extends React.Component {
                             crossOrigin: 'true'
                         },
                         tracks: [{
-                            src:`https://s3.ap-northeast-2.amazonaws.com/exprgram.kyungjejo.com/subtitle/${youtubeId}.en.vtt`,
+                            src:`https://s3.ap-northeast-2.amazonaws.com/exprgram.kyungjejo.com/subtitle_masked/${youtubeId}_${sentNum}_${word}_masked.en.vtt`,
                             label:'English',
                             kind:'captions',
                             srcLang:'en',

@@ -12,8 +12,8 @@ const mapStateToProps = state => ({
 })
 
 function WordCard(props) {
-    const { words, wordIndex, definitions } = props;
-    const word = words[wordIndex.index]
+    const { words, wordIndex, definitions, pseudo } = props;
+    const word = pseudo[wordIndex.index]
     const definition = definitions[wordIndex.index]
     return(
         <StyledCard>

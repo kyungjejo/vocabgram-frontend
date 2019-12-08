@@ -3,9 +3,11 @@ import { Segment, Button } from 'semantic-ui-react';
 import styled from 'styled-components'
 import WordCard from '../components/WordCard';
 import MultipleChoice from '../components/MultipleChoice';
+import {withRouter} from 'react-router';
 
 import { connect } from 'react-redux';
-import { updateVideoIndex, updateWordIndex, updateMode } from '../actions';
+import { updateVideoIndex, updateWordIndex, updateMode, 
+    storeVideos, storePracticeIndex, storePracticeCorrectCount } from '../actions';
 
 const StyledSegment = styled(Segment)`
     min-width: 60%;
@@ -31,8 +33,11 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     updateVideoIndex: (index) => dispatch(updateVideoIndex(index)),
+    storeVideos: (videos) => dispatch(storeVideos(videos)),
     updateWordIndex: (index) => dispatch(updateWordIndex(index)),
     updateMode: (mode) => dispatch(updateMode(mode)),
+    storePracticeIndex: (index) => dispatch(storePracticeIndex(index)),
+    storePracticeCorrectCount: (count) => dispatch(storePracticeCorrectCount(count)),
 })
 
 function shuffleArray(array) {
@@ -48,22 +53,42 @@ function shuffleArray(array) {
 function ActivityBar(props){
     const [ questionOptions, setQuestionOptions ] = useState({});
 
-    const { word, updateVideoIndex, updateWordIndex, updateMode,
-        videoIndex, incOffset, wordIndex, words, dummy, definitions } = props;
+    const { word, updateVideoIndex, updateWordIndex, updateMode, practiceIndexes, pseudo, videos, storePracticeCorrectCount,
+        videoIndex, incOffset, wordIndex, words, answer, correctCount } = props;
     // updateMode(false);
-    const incVideoIndex = () => {
+    const wordLearned = (type) => {
+        const { word, wordIndex, userid  } = props;
+        let _userid;
+        if (typeof userid === "object") _userid = Object.values(userid).join('')
+        else _userid = userid
+        let param = `user=${_userid}&word=${word}&index=${wordIndex.index}`
+        fetch('/word?'+param)
+            .then(res=>res.json())
+            .then(result => console.log(result))
+            .catch(error => console.log('Error! ' + error.message))
+    }
+
+    const videoWatched = (type) => {
+        const { word, videos, videoIndex, wordIndex, userid  } = props;
+        let vid = videos[wordIndex.index][videoIndex.index];
+        let _userid;
+        if (typeof userid === "object") _userid = Object.values(userid).join('')
+        else _userid = userid
+        let param = `user=${_userid}&word=${word}&sent_num=${vid[1]}&video_id=${vid[0]}&type=${type}`
+        fetch('/video?'+param)
+            .then(res=>res.json())
+            .then(result => console.log(result))
+            .catch(error => console.log('Error! ' + error.message))
+    }
+
+    const incVideoIndex = (type) => {
+        // word sent_num video_id type
+        videoWatched(type)
         updateVideoIndex(videoIndex.index+1)
     }
 
-    const onProceed = () => {
-        const next = wordIndex.index < Object.keys(words).length - 1;
-        if (next) {
-            updateWordIndex(wordIndex.index+1);
-            updateVideoIndex(0);
-        }
-    }
-
     const toQuestionMode = () => {
+        const { updateMode, wordIndex, dummy, definitions } = props;
         let defs = [['correct', definitions[wordIndex.index]]]
         for (let i = 1; i < 4; i++) {
             defs.push(['incorrect'+i.toString(), Object.values(dummy).splice(Math.floor(Math.random() * Object.values(dummy).length), 1)[0]]);
@@ -71,6 +96,73 @@ function ActivityBar(props){
         defs = shuffleArray(defs);
         setQuestionOptions(defs);
         updateMode(true);
+    }
+
+    const onProceed = () => {
+        const next = wordIndex.index < Object.keys(words).length - 1;
+        if (next) {
+            videoWatched("watch")
+            updateWordIndex(wordIndex.index+1);
+            updateVideoIndex(0);
+        }
+        // else  - when there is no more videos to watch.
+    }
+
+    function onInferNext(result, type) {
+        if (result === 'correct') {
+            const next = wordIndex.index < Object.keys(words).length - 1;
+            // Learn more words
+            if (next) {
+                practiceIndexes[wordIndex.index] = videoIndex.index+1
+                storePracticeIndex(practiceIndexes)
+                updateWordIndex(wordIndex.index+1);
+                updateVideoIndex(0);
+                updateMode(false);  
+                wordLearned('infer');
+            }
+            // go to practice mode
+            else {
+                storePracticeCorrectCount(0);
+                updateWordIndex(0);
+                updateVideoIndex(practiceIndexes[0]);
+                props.history.push('/practice');
+                
+            }
+        }
+        else {
+            updateMode(false);
+            updateVideoIndex(videoIndex.index+1);
+        }
+    }
+
+    function onPracticeNext(result, type) {
+        const next = wordIndex.index < Object.keys(words).length - 1;
+        if ( !next ) {
+            props.history.push('/');
+            // update here // it's either there is no more videos, or learners got three or more correct.
+        }
+        if (result === 'correct') {
+            if ( correctCount.count+1 >= 3 ) {
+                wordLearned('practice');
+                updateWordIndex(wordIndex.index+1);
+                updateVideoIndex(0);
+                storePracticeCorrectCount(0);
+            }
+            else {
+                storePracticeCorrectCount(correctCount.count+1);
+                updateVideoIndex(videoIndex.index+1);
+            }
+        }
+        else {
+            if ( videoIndex.index >= Object.keys(videos[wordIndex.index]).length -1 ) {
+                updateWordIndex(wordIndex.index+1);
+                updateVideoIndex(0);
+                storePracticeCorrectCount(0);
+            }
+            else updateVideoIndex(videoIndex.index+1);
+        }
+        // got more than three correctly
+        // no more videos to watch
 
     }
 
@@ -81,13 +173,13 @@ function ActivityBar(props){
                 props.type === "infer" && props.mode ?
                     <span>
                         <StyledSpan>
-                            <StyledP><u>Target Word: {word}</u></StyledP>
+                            <StyledP><u>Target Word: {pseudo[wordIndex.index]}</u></StyledP>
                             <StyledP>Focus on learning both <b>the meaning and the use</b> of the word.</StyledP>
                         </StyledSpan>
                         <span>
                             <StyledP>Please watch <b>at least three</b> videos before proceeding to the next stage.</StyledP>
                             <Button onClick={incOffset} color="yellow">Video is too short.</Button>
-                            <Button primary onClick={incVideoIndex}>Watch Next Video</Button>
+                            <Button primary onClick={() => incVideoIndex('infer')}>Watch Next Video</Button>
                         </span>
                     </span>
                     :
@@ -96,11 +188,11 @@ function ActivityBar(props){
                     <span>
                         {
                             props.questionMode ?
-                            <MultipleChoice questionOptions={questionOptions} type={"infer"} choice={4}/>
+                            <MultipleChoice onNext={onInferNext} questionOptions={questionOptions} type={"infer"} choice={4}/>
                             :
                             <span>
                                 <StyledSpan>
-                                    <StyledP><u>Target Word: {word}</u></StyledP>
+                                    <StyledP><u>Target Word: {pseudo[wordIndex.index]}</u></StyledP>
                                     <StyledP>Focus on learning both <b>the meaning and the use</b> of the word.</StyledP>
                                 </StyledSpan>
                                 <StyledSpan>
@@ -109,7 +201,7 @@ function ActivityBar(props){
                                 </StyledSpan>
                                 <StyledDiv>
                                     <Button onClick={incOffset} color="yellow">Video is too short.</Button>
-                                    <Button negative onClick={incVideoIndex}>I'm not ready yet.</Button>
+                                    <Button negative onClick={() => incVideoIndex('infer')}>I'm not ready yet.</Button>
                                     <Button positive onClick={toQuestionMode}>Test Myself!</Button>
                                 </StyledDiv>
                             </span>
@@ -126,7 +218,7 @@ function ActivityBar(props){
                         <span>
                             <StyledP>Please watch <b>at least three</b> videos before proceeding to the next stage.</StyledP>
                             <Button onClick={incOffset} color="yellow">Video is too short.</Button>
-                            <Button primary onClick={ incVideoIndex }>Watch Next Video</Button>
+                            <Button primary onClick={ () => incVideoIndex('watch') }>Watch Next Video</Button>
                         </span>
                     </span>
                     :
@@ -144,20 +236,20 @@ function ActivityBar(props){
                             </StyledSpan>
                             <StyledDiv>
                                 <Button onClick={incOffset} color="yellow">Video is too short.</Button>
-                                <Button negative onClick={ incVideoIndex }>I'm not ready yet.</Button>
+                                <Button negative onClick={ () => incVideoIndex('watch') }>I'm not ready yet.</Button>
                                 <Button positive onClick={ onProceed }>{ wordIndex.index < Object.keys(words).length-1 ? "Learn next word." : "I'm done." }</Button>
                             </StyledDiv>
                         </span>
                     </span>
                     :
                 // Practice
-                props.type === "practice" && props.mode ?
+                props.type === "practice" ?
                     <span>
                         <StyledSpan>
-                            <MultipleChoice choice={2} type={'practice'}/>
+                            {/* <MultipleChoice onNext={onNext} questionOptions={questionOptions} type={"infer"} choice={4}/> */}
+                            <MultipleChoice answer={answer} onNext={onPracticeNext} incOffset={incOffset} choice={2} type={'practice'}/>
+                            <WordCard word={word} />
                         </StyledSpan>
-                        <Button onClick={incOffset} color="yellow">Video is too short.</Button>
-                        <Button positive>Proceed</Button>
                     </span>
                 :
                 ''
@@ -167,4 +259,4 @@ function ActivityBar(props){
     )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActivityBar);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(ActivityBar));
