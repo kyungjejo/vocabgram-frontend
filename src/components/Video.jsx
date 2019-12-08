@@ -44,7 +44,7 @@ class Video extends React.Component {
     }
 
     onProgressHandler(info) {
-        const { offsetTime, targetTime, type } = this.props;
+        const { offsetTime, targetTime } = this.props;
         const { playedSeconds } = info;
         if (this.player && playedSeconds>targetTime + offsetTime) {
             this.player.pause();
@@ -55,10 +55,21 @@ class Video extends React.Component {
             this.player.seekTo(targetTime - offsetTime,"seconds");
         }
         if (this.player) {
-            if (playedSeconds>targetTime - 1 && playedSeconds<targetTime + 1)
-                this.player.mute();
-            else
-                this.player.unmute();
+            if (playedSeconds>targetTime - 1 && playedSeconds<targetTime + 1) {
+                let videoPlayers = document.getElementsByClassName('video-player');
+                for (let i=0; i<videoPlayers.length; i++) {
+                    document.getElementsByClassName('video-player')[i].firstElementChild.muted = true;
+                }
+            }
+                // this.player.mute();
+            else {
+                let videoPlayers = document.getElementsByClassName('video-player');
+                for (let i=0; i<videoPlayers.length; i++) {
+                    document.getElementsByClassName('video-player')[i].firstElementChild.muted = false;
+                }
+                // document.getElementsByClassName('video-player')[0].firstElementChild.muted = false;
+                // this.player.unmute();
+            }
         }
         if (playedSeconds>targetTime - 2 && playedSeconds<targetTime + 2) this.setState({divActive: true})
         else this.setState({divActive: false})
@@ -79,6 +90,7 @@ class Video extends React.Component {
         return (
             type === 'practice' ?
                 <SmallReactPlayer ref={player => { this.player = player; }}
+                    className="video-player"
                     url={[`https://s3.ap-northeast-2.amazonaws.com/exprgram.kyungjejo.com/video/${youtubeId}.mp4`]}
                     type='video/mp4'
                     controls
@@ -105,6 +117,7 @@ class Video extends React.Component {
                     style={{ padding: '6px', background: divActive ? 'red' : 'unset' }}
                     url={[`https://s3.ap-northeast-2.amazonaws.com/exprgram.kyungjejo.com/video/${youtubeId}.mp4`]}
                     type='video/mp4'
+                    className="video-player"
                     controls
                     autoPlay={false}
                     progressInterval={500}

@@ -4,11 +4,7 @@ import { connect } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 import { updateMode, updateVideoIndex, updateWordIndex } from '../actions';
 
-const inferOptions = [{value: 0, name: 'definition 1'}, {value: 1, name: 'definition 2'}, {value: 2, name: 'definition 3'}, {value: 3, name: 'definition 4'}]
-const practiceOptions = [{value: 0, name: 'Video A'}, {value: 1, name: 'Video B'}]
-
-{/* <div>{selectedOptions && selectedOptions['selectedOptions'] ? 
-                "Your selected the answer #" + (parseInt(selectedOptions['selectedOptions']['0'])+1) : 'Please select one of the below'}.</div> */}
+const practiceOptions = [{value: 0, name: 'Video A'}, {value: 1, name: 'Video B'}];
 
 const mapStateToProps = state => ({
         ...state

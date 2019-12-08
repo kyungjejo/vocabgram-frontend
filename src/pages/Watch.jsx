@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactPlayer from 'react-player'
 
 import styled from 'styled-components'
 import './index.css';
@@ -12,12 +11,6 @@ const Container = styled.div`
     min-width: 60%;
     max-width: 80%;
     margin: 16px auto;
-`
-
-const StyledReactPlayer = styled(ReactPlayer)`
-    min-width: 60%;
-    max-width: 860px;
-    margin: 8px auto;
 `
 
 const mapStateToProps = state => ({

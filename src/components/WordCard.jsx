@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from 'semantic-ui-react'
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { connect } from 'react-redux';
 
 const StyledCard = styled(Card)({
@@ -12,7 +12,7 @@ const mapStateToProps = state => ({
 })
 
 function WordCard(props) {
-    const { words, wordIndex, definitions, pseudo } = props;
+    const { wordIndex, definitions, pseudo } = props;
     const word = pseudo[wordIndex.index]
     const definition = definitions[wordIndex.index]
     return(
