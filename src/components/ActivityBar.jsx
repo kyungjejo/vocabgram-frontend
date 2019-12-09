@@ -76,7 +76,7 @@ function ActivityBar(props){
         else _userid = userid
         let param = `user=${_userid}&word=${word}&sent_num=${vid[1]}&video_id=${vid[0]}&type=${type}`
         fetch('/video?'+param)
-            .then(res=>res.json())
+            .then(res=>console.log(res))
             .then(result => console.log(result))
             .catch(error => console.log('Error! ' + error.message))
     }
