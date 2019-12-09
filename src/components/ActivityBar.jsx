@@ -139,29 +139,30 @@ function ActivityBar(props){
     function onPracticeNext(result, type) {
         videoWatched('practice');
         const next = wordIndex.index < Object.keys(words).length - 1;
-        if ( !next ) {
-            props.history.push('/');
-            // update here // it's either there is no more videos, or learners got three or more correct.
-        }
         if (result === 'correct') {
             if ( correctCount.count+1 >= 3 ) {
                 wordLearned('practice');
-                updateWordIndex(wordIndex.index+1);
+                if ( !next ) {
+                    props.history.push('/');
+                    // update here // it's either there is no more videos, or learners got three or more correct.
+                }
+                else {
+                    updateWordIndex(wordIndex.index+1);
+                }
                 updateVideoIndex(0);
                 storePracticeCorrectCount(0);
             }
             else {
                 storePracticeCorrectCount(correctCount.count+1);
-                updateVideoIndex(videoIndex.index+1);
+                if ( videoIndex.index >= Object.keys(videos[wordIndex.index]).length -1 ) {
+                    updateWordIndex(wordIndex.index+1);
+                    updateVideoIndex(0);
+                    storePracticeCorrectCount(0);
+                }
+                else {
+                    updateVideoIndex(videoIndex.index+1);
+                }
             }
-        }
-        else {
-            if ( videoIndex.index >= Object.keys(videos[wordIndex.index]).length -1 ) {
-                updateWordIndex(wordIndex.index+1);
-                updateVideoIndex(0);
-                storePracticeCorrectCount(0);
-            }
-            else updateVideoIndex(videoIndex.index+1);
         }
         // got more than three correctly
         // no more videos to watch
