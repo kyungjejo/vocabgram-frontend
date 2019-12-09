@@ -47,11 +47,17 @@ class Video extends React.Component {
         const { offsetTime, targetTime } = this.props;
         const { playedSeconds } = info;
         if (this.player && playedSeconds>targetTime + offsetTime) {
-            this.player.pause();
+            let videoPlayers = document.getElementsByClassName('video-player');
+            for (let i=0; i<videoPlayers.length; i++) {
+                document.getElementsByClassName('video-player')[i].firstElementChild.pause();
+            }
             this.player.seekTo(targetTime - offsetTime,"seconds");
         }
         if (this.player && playedSeconds<targetTime - offsetTime) {
-            this.player.pause();
+            let videoPlayers = document.getElementsByClassName('video-player');
+            for (let i=0; i<videoPlayers.length; i++) {
+                document.getElementsByClassName('video-player')[i].firstElementChild.pause();
+            }
             this.player.seekTo(targetTime - offsetTime,"seconds");
         }
         if (this.player) {
