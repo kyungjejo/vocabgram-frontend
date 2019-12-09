@@ -77,7 +77,7 @@ class Video extends React.Component {
                 // this.player.unmute();
             }
         }
-        if (playedSeconds>targetTime - 2 && playedSeconds<targetTime + 2) this.setState({divActive: true})
+        if (playedSeconds>targetTime - 1 && playedSeconds<targetTime + 1) this.setState({divActive: true})
         else this.setState({divActive: false})
     }
 
