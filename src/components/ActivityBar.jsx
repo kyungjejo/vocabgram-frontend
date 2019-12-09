@@ -109,6 +109,7 @@ function ActivityBar(props){
     }
 
     function onInferNext(result, type) {
+        videoWatched('infer');
         if (result === 'correct') {
             const next = wordIndex.index < Object.keys(words).length - 1;
             // Learn more words
@@ -136,6 +137,7 @@ function ActivityBar(props){
     }
 
     function onPracticeNext(result, type) {
+        videoWatched('practice');
         const next = wordIndex.index < Object.keys(words).length - 1;
         if ( !next ) {
             props.history.push('/');
