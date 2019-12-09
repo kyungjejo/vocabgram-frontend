@@ -29,14 +29,14 @@ function MultipleChoice(props) {
         else _userid = userid
         if (type==='infer') {
             let param = `user=${_userid}&word=${words[wordIndex.index]}&result=${selectedOptions.selectedOptions[0]==='correct' ? '1' : '0'}`
-            fetch('/infer?'+param)
+            fetch(`${process.env.REACT_APP_URL}/infer?`+param)
                 .then(res => res.json())
                 .then(res => console.log(res))
                 .catch(error => console.log('Error! ' + error.message))   
         }
         else if (type==='practice') {
             let param = `user=${_userid}&word=${words[wordIndex.index]}&videoId=${videos[wordIndex.index][videoIndex.index][0]}&videoIndex=${videoIndex.index}&result=${selectedOptions.selectedOptions[0]==='correct' ? '1' : '0'}`
-            fetch('/practice?'+param)
+            fetch(`${process.env.REACT_APP_URL}/practice?`+param)
                 .then(res => res.json())
                 .then(res => console.log(res))
                 .catch(error => console.log('Error! ' + error.message))   

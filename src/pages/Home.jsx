@@ -63,8 +63,7 @@ class Home extends React.Component {
                 })
                 .catch(error => console.log('Error! ' + error.message))
             fetch(`${process.env.REACT_APP_URL}/dummy`)
-                .then(res => console.log(res))
-                // .then(res => res.json())
+                .then(res => res.json())
                 .then(res => {
                     let dummy = res['dummy']
                     storeDummy(dummy);

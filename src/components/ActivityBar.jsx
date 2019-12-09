@@ -62,7 +62,7 @@ function ActivityBar(props){
         if (typeof userid === "object") _userid = Object.values(userid).join('')
         else _userid = userid
         let param = `user=${_userid}&word=${word}&index=${wordIndex.index}`
-        fetch('/word?'+param)
+        fetch(`${process.env.REACT_APP_URL}/word?`+param)
             .then(res=>res.json())
             .then(result => console.log(result))
             .catch(error => console.log('Error! ' + error.message))
@@ -75,8 +75,8 @@ function ActivityBar(props){
         if (typeof userid === "object") _userid = Object.values(userid).join('')
         else _userid = userid
         let param = `user=${_userid}&word=${word}&sent_num=${vid[1]}&video_id=${vid[0]}&type=${type}`
-        fetch('/video?'+param)
-            .then(res=>console.log(res))
+        fetch(`${process.env.REACT_APP_URL}/video?`+param)
+            .then(res=>res.json())
             .then(result => console.log(result))
             .catch(error => console.log('Error! ' + error.message))
     }
